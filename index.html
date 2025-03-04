@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restoran Lezat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #2d2d2d;
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #ffffff;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-menu li a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu li a:hover,
+        .nav-menu li a.active {
+            background-color: #ff6b6b;
+            border-radius: 5px;
+        }
+
+        /* Content */
+        .content {
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 2rem;
+            flex: 1 0 auto;
+        }
+
+        .section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+            opacity: 1;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* Home Section */
+        #home {
+            padding: 4rem 0;
+            position: relative;
+        }
+
+        .gallery-container {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+        }
+
+        .gallery {
+            display: flex;
+            gap: 2rem;
+            position: absolute;
+            animation: scroll 20s linear infinite;
+        }
+
+        .gallery-item {
+            width: 300px; /* Diubah dari 600px menjadi 300px */
+            height: 300px;
+            flex-shrink: 0;
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-description {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(45, 45, 45, 0.8);
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-description {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Dynamic Home Description */
+        .home-description {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(45, 45, 45, 0.7);
+            border-radius: 15px;
+            margin: 2rem auto;
+            max-width: 800px;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+            font-size: 1.2em;
+            color: #ff6b6b;
+            line-height: 1.8;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Menu Section */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columns per row */
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .menu-item {
+            background-color: #2d2d2d;
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(50px); /* Start below */
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .menu-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .menu-item:nth-child(odd).visible {
+            transform: translateY(0) scale(1.05); /* Left box moves up */
+        }
+
+        .menu-item:nth-child(even).visible {
+            transform: translateY(0) scale(1.05); /* Right box moves down initially, then up */
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        .menu-item img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-item img:hover {
+            transform: scale(1.1);
+        }
+
+        .menu-item h3 {
+            color: #ff6b6b;
+            margin: 0.5rem 0;
+            text-align: center;
+        }
+
+        .menu-item p {
+            color: #cccccc;
+            text-align: center;
+        }
+
+        .menu-description {
+            background: rgba(45, 45, 45, 0.9);
+            padding: 1rem;
+            position: absolute;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            color: #ffffff;
+            transition: bottom 0.5s ease;
+            font-size: 0.9rem;
+            text-align: center;
+            font-style: italic;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .menu-item:hover .menu-description {
+            bottom: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Reservation Section */
+        .reservation-form {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: #2d2d2d;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ff6b6b;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: #3d3d3d;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            box-shadow: 0 0 5px #ff6b6b;
+            background: #4a4a4a;
+        }
+
+        .error {
+            color: #ff4d4d;
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .reservation-form button {
+            width: 100%;
+            padding: 1rem;
+            background: #ff6b6b;
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .reservation-form button:hover {
+            transform: scale(1.05);
+            background: #ff8787;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .contact h2 {
+            font-size: 28px;
+            margin-bottom: 2rem;
+            color: #ff6b6b;
+        }
+
+        .contact form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.1);
+        }
+
+        .contact label {
+            font-size: 16px;
+            margin-bottom: 0.5rem;
+            color: #ff6b6b;
+            text-align: left;
+            display: block;
+        }
+
+        .contact input,
+        .contact textarea {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1.5rem;
+            background-color: #3d3d3d;
+            border: none;
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .contact textarea {
+            height: 100px;
+            resize: none;
+        }
+
+        .contact input:focus,
+        .contact textarea:focus {
+            outline: none;
+            box-shadow: 0 0 5px #ff6b6b;
+            background: #4a4a4a;
+        }
+
+        .contact .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .contact button {
+            padding: 1rem 2rem;
+            background-color: #ff6b6b;
+            border: none;
+            color: #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .contact button:hover {
+            transform: scale(1.05);
+            background: #ff8787;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            position: relative;
+            text-align: center;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+
+        .lightbox-description {
+            color: #fff;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            margin-top: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(90deg, #2d2d2d, #3d3d3d);
+            padding: 2.5rem 1rem;
+            text-align: center;
+            margin-top: auto;
+            flex-shrink: 0;
+            border-top: 2px solid #ff6b6b;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .footer .logo {
+            font-size: 2rem;
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .footer p {
+            color: #cccccc;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .social-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer .social-links a {
+            color: #ff6b6b;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .footer .social-links a:hover {
+            color: #ff8787;
+            transform: scale(1.2);
+        }
+
+        .footer .contact-info {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background-color: #2d2d2d;
+                flex-direction: column;
+                padding: 1rem;
+                text-align: center;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .content {
+                padding: 1rem;
+                margin-top: 60px;
+            }
+
+            .gallery-container {
+                height: 200px;
+            }
+
+            .gallery-item {
+                width: 200px;
+                height: 200px;
+            }
+
+            .gallery-description {
+                font-size: 0.8rem;
+                padding: 5px;
+            }
+
+            .home-description {
+                font-size: 1em;
+                padding: 1.5rem;
+                max-width: 90%;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr; /* Stack vertically on mobile */
+            }
+
+            .menu-item img {
+                width: 150px;
+                height: 150px;
+            }
+
+            .menu-description {
+                font-size: 0.7rem;
+            }
+
+            .lightbox-description {
+                font-size: 0.9em;
+            }
+
+            .contact form {
+                width: 90%;
+                padding: 1.5rem;
+            }
+
+            .footer .social-links a {
+                font-size: 1.2rem;
+                margin: 0 0.5rem;
+            }
+
+            .footer-content {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="brand">waroeng ku</div>
+            <div class="hamburger">☰</div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#menu">Menu</a></li>
+                <li><a href="#reservation">Reservasi</a></li>
+                <li><a href="#contact">Kontak</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="content">
+        <section id="home" class="section active">
+            <h1>Welcome to waroeng ku</h1>
+            <div class="gallery-container">
+                <div class="gallery">
+                    <div class="gallery-item" data-src="img/1.jpeg">
+                        <img src="img/1.jpeg" alt="Restoran 1">
+                        <div class="gallery-description"> A spicy and savory Indonesian street food made with crackers in a rich, fiery broth – a bold flavor experience!</div>
+                    </div>
+                    <div class="gallery-item" data-src="img/2.jpeg">
+                        <img src="img/2.jpeg" alt="Restoran 2">
+                        <div class="gallery-description">A delightful mix of steamed rice served with fresh vegetables and topped with a delicious peanut sauce.</div>
+                    </div>
+                    <div class="gallery-item" data-src="img/3.jpeg">
+                        <img src="img/3.jpeg" alt="Restoran 3">
+                        <div class="gallery-description">  Fragrant rice paired with tender duck and fresh veggie side dishes, served with a tangy sambal.</div>
+                    </div>
+                    <div class="gallery-item" data-src="img/4.jpeg">
+                        <img src="img/4.jpeg" alt="Restoran 1">
+                        <div class="gallery-description">Traditional Palembang fish cakes served with a sweet and sour vinegar sauce – a true Indonesian delicacy!</div>
+                    </div>
+                    <div class="gallery-item" data-src="img/5.jpeg">
+                        <img src="img/5.jpeg" alt="Restoran 2">
+                        <div class="gallery-description"> A rich, dark beef soup spiced with black keluak nuts, offering a deep and aromatic taste.</div>
+                    </div>
+                    <div class="gallery-item" data-src="img/6.jpeg">
+                        <img src="img/6.jpeg" alt="Restoran 3">
+                        <div class="gallery-description">Crispy fried tempeh coated in a light batter, perfect as a savory snack or side dish.</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Dynamic Home Description -->
+            <div class="home-description">
+                Welcome to my waroeng Discover an unforgettable culinary experience with authentic flavors and a warm atmosphere. This website is designed to provide the latest information about our menu, reservations, and contacts. Explore and taste the deliciousness of every dish!
+            </div>
+        </section>
+
+        <section id="menu" class="section">
+            <h1>Daftar Menu</h1>
+            <div class="menu-grid">
+                <div class="menu-item">
+                    <img src="img/1.jpeg" alt="Seblak" data-src="img/1.jpeg">
+                    <h3>Seblak</h3>
+                    <p>Rp 15.000</p>
+                    <div class="menu-description">
+                        A spicy and savory Indonesian street food made with crackers in a rich, fiery broth – a bold flavor experience!
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <img src="img/2.jpeg" alt="Nasi Pecel" data-src="img/2.jpeg">
+                    <h3>Nasi Pecel</h3>
+                    <p>Rp 15.000</p>
+                    <div class="menu-description">
+                        A delightful mix of steamed rice served with fresh vegetables and topped with a delicious peanut sauce.
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <img src="img/3.jpeg" alt="Nasi Lalapan Bebek" data-src="img/3.jpeg">
+                    <h3>Nasi Lalapan Bebek</h3>
+                    <p>Rp 20.000</p>
+                    <div class="menu-description">
+                        Fragrant rice paired with tender duck and fresh veggie side dishes, served with a tangy sambal.
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <img src="img/4.jpeg" alt="Pempek" data-src="img/4.jpeg">
+                    <h3>Pempek</h3>
+                    <p>Rp 15.000</p>
+                    <div class="menu-description">
+                        Traditional Palembang fish cakes served with a sweet and sour vinegar sauce – a true Indonesian delicacy!
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <img src="img/5.jpeg" alt="Rawon" data-src="img/5.jpeg">
+                    <h3>Rawon</h3>
+                    <p>Rp 15.000</p>
+                    <div class="menu-description">
+                        A rich, dark beef soup spiced with black keluak nuts, offering a deep and aromatic taste.
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <img src="img/6.jpeg" alt="Tempe Mendoan" data-src="img/6.jpeg">
+                    <h3>Tempe Mendoan</h3>
+                    <p>Rp 10.000</p>
+                    <div class="menu-description">
+                        Crispy fried tempeh coated in a light batter, perfect as a savory snack or side dish.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="reservation" class="section">
+            <h1>Formulir Reservasi</h1>
+            <div class="reservation-form">
+                <form id="reservationForm" onsubmit="return sendReservation(event)">
+                    <div class="form-group">
+                        <label for="fullName">Nama Lengkap</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                        <div class="error" id="fullNameError">Nama lengkap tidak boleh kosong</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="error" id="emailError">Email tidak valid</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Tanggal Reservasi</label>
+                        <input type="date" id="date" name="date" required>
+                        <div class="error" id="dateError">Tanggal harus diisi</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="time">Waktu Reservasi</label>
+                        <input type="time" id="time" name="time" required>
+                        <div class="error" id="timeError">Waktu harus diisi</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="guests">Jumlah Tamu</label>
+                        <input type="number" id="guests" name="guests" min="1" required>
+                        <div class="error" id="guestsError">Jumlah tamu harus lebih dari 0</div>
+                    </div>
+
+                    <button type="submit">Kirim Reservasi</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="contact" class="section contact">
+            <h2>Kontak Kami</h2>
+            <form action="https://formspree.io/f/mpwqvnnq" method="POST">
+                <label for="name">Nama</label>
+                <input type="text" id="name" name="name" placeholder="Nama Anda" required>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Email Anda" required>
+                <label for="message">Pesan</label>
+                <textarea id="message" name="message" placeholder="Pesan Anda" required></textarea>
+                <div class="button-group">
+                    <button type="submit">Kirim</button>
+                    <button type="reset">Reset</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <img src="" alt="Lightbox Image">
+            <div class="lightbox-description">Description will appear here...</div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="logo">waroeng ku</div>
+            <p>© 2025 waroeng ku. All rights reserved.</p>
+            <div class="social-links">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="mailto:ekazein86@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+            <div class="contact-info">
+                <p>Hubungi kami: +62 856 0487 3274</p>
+                <p>Alamat: Jl. pluto No. 124, venus</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        // Inisialisasi EmailJS
+        (function(){
+            emailjs.init("EO5oTo-thw3OIoZyy");
+        })();
+
+        // Hamburger menu
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            hamburger.classList.toggle('open');
+        });
+
+        // Navigation
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        const sections = document.querySelectorAll('.section');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                navLinks.forEach(l => l.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                link.classList.add('active');
+                document.getElementById(targetId).classList.add('active');
+                navMenu.classList.remove('active');
+                hamburger.classList.remove('open');
+            });
+        });
+
+        // Lightbox
+        const lightboxItems = document.querySelectorAll('.gallery-item, .menu-item img');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = lightbox.querySelector('img');
+        const lightboxDescription = lightbox.querySelector('.lightbox-description');
+
+        lightboxItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const src = item.getAttribute('data-src');
+                lightboxImg.src = src;
+                let description = item.nextElementSibling?.textContent || item.parentElement.querySelector('.menu-description')?.textContent || 'No description available';
+                lightboxDescription.textContent = description;
+                lightbox.classList.add('active');
+            });
+        });
+
+        // Exit lightbox with a single click anywhere
+        lightbox.addEventListener('click', (e) => {
+            lightbox.classList.remove('active');
+        });
+
+        // Pause gallery animation on hover
+        const gallery = document.querySelector('.gallery');
+        gallery.addEventListener('mouseover', () => {
+            gallery.style.animationPlayState = 'paused';
+        });
+        gallery.addEventListener('mouseout', () => {
+            gallery.style.animationPlayState = 'running';
+        });
+
+        // Scroll-driven animation for menu items
+        function checkVisibility() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const windowHeight = window.innerHeight;
+
+            menuItems.forEach(item => {
+                const rect = item.getBoundingClientRect();
+                const isVisible = rect.top < windowHeight - 100 && rect.bottom > 100;
+
+                if (isVisible) {
+                    item.classList.add('visible');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', checkVisibility);
+        window.addEventListener('load', checkVisibility);
+
+        // Reservation handling
+        function sendReservation(event) {
+            event.preventDefault();
+            let isValid = true;
+
+            document.querySelectorAll('.error').forEach(error => error.style.display = 'none');
+
+            const fullName = document.getElementById('fullName').value.trim();
+            if (!fullName) {
+                document.getElementById('fullNameError').style.display = 'block';
+                isValid = false;
+            }
+
+            const email = document.getElementById('email').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            }
+
+            const date = document.getElementById('date').value;
+            if (!date) {
+                document.getElementById('dateError').style.display = 'block';
+                isValid = false;
+            }
+
+            const time = document.getElementById('time').value;
+            if (!time) {
+                document.getElementById('timeError').style.display = 'block';
+                isValid = false;
+            }
+
+            const guests = document.getElementById('guests').value;
+            if (!guests || guests <= 0) {
+                document.getElementById('guestsError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (isValid) {
+                const params = {
+                    fullName: fullName,
+                    email: email,
+                    date: date,
+                    time: time,
+                    guests: guests
+                };
+
+                emailjs.send('service_n11rglg', 'template_d0tf2nl', params)
+                    .then(function(response) {
+                        alert(`Reservasi berhasil!\nNama: ${fullName}\nTanggal: ${date}\nWaktu: ${time}\nJumlah Tamu: ${guests}`);
+                        document.getElementById('reservationForm').reset();
+                    }, function(error) {
+                        alert('Gagal mengirim reservasi: ' + JSON.stringify(error));
+                    });
+            }
+
+            return false;
+        }
+    </script>
+</body>
+</html>
